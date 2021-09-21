@@ -125,7 +125,7 @@ _C.DEBUG.SAVE_HEATMAPS_PRED = False
 
 def update_config(cfg, args):
     cfg.defrost()
-    cfg.merge_from_file(args.cfg)
+    cfg.merge_from_file(args.hrnet_cfg)
     cfg.merge_from_list(args.opts)
 
     if args.modelDir:

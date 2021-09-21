@@ -12,5 +12,5 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import models.pose_resnet
-import models.pose_hrnet
+from .pose_resnet import get_pose_net as get_resnet_pose_net
+from .pose_hrnet import get_pose_net
