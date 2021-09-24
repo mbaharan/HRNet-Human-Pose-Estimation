@@ -12,7 +12,6 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
-import torchvision.transforms as transforms
 
 from .lib.config import update_config
 from .lib import models
