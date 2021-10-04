@@ -37,7 +37,7 @@ def build_hrnnet(cfg, args, logger):
     logger.info('=> loading model from {}'.format(cfg.TEST.MODEL_FILE))
     model.load_state_dict(torch.load(cfg.TEST.MODEL_FILE), strict=False)
 
-    model = torch.nn.DataParallel(model, device_ids=cfg.GPUS).cuda()
+    model = torch.nn.DataParallel(model).cuda()
 
     return model
 
