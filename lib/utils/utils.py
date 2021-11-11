@@ -19,15 +19,19 @@ import torch.optim as optim
 import torch.nn as nn
 
 
-def create_logger(cfg, cfg_name, phase='train'):
+def create_logger(args, cfg, cfg_name, phase='train'):
     root_output_dir = Path(cfg.OUTPUT_DIR)
     # set up logger
     if not root_output_dir.exists():
         print('=> creating {}'.format(root_output_dir))
         root_output_dir.mkdir()
 
-    dataset = cfg.DATASET.DATASET + '_' + cfg.DATASET.HYBRID_JOINTS_TYPE \
-        if cfg.DATASET.HYBRID_JOINTS_TYPE else cfg.DATASET.DATASET
+    if not args.bottom_up_approach:
+        dataset = cfg.DATASET.DATASET + '_' + cfg.DATASET.HYBRID_JOINTS_TYPE \
+            if cfg.DATASET.HYBRID_JOINTS_TYPE else cfg.DATASET.DATASET
+    else:
+        dataset = cfg.DATASET.DATASET + '_eff_hrNet'
+
     dataset = dataset.replace(':', '_')
     model = cfg.MODEL.NAME
     cfg_name = os.path.basename(cfg_name).split('.')[0]
@@ -128,7 +132,7 @@ def get_model_summary(model, *input_tensors, item_length=26, verbose=False):
                     torch.prod(
                         torch.LongTensor(list(output.size())[2:]))).item()
             elif isinstance(module, nn.Linear):
-                flops = (torch.prod(torch.LongTensor(list(output.size()))) \
+                flops = (torch.prod(torch.LongTensor(list(output.size())))
                          * input[0].size(1)).item()
 
             if isinstance(input[0], list):
@@ -169,7 +173,7 @@ def get_model_summary(model, *input_tensors, item_length=26, verbose=False):
                 ' ' * (space_len - len("Output Size")),
                 ' ' * (space_len - len("Parameters")),
                 ' ' * (space_len - len("Multiply Adds (Flops)"))) \
-                + os.linesep + '-' * space_len * 5 + os.linesep
+            + os.linesep + '-' * space_len * 5 + os.linesep
 
     params_sum = 0
     flops_sum = 0
