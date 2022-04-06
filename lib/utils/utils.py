@@ -19,69 +19,37 @@ import torch.optim as optim
 import torch.nn as nn
 
 
-def create_logger(cfg, cfg_name, phase='train'):
-    root_output_dir = Path(cfg.OUTPUT_DIR)
+from api_utils.interfaces import Client
+
+
+def create_logger(cfg: Client):
+    root_output_dir = Path(cfg.Output_Dir)
     # set up logger
     if not root_output_dir.exists():
         print('=> creating {}'.format(root_output_dir))
         root_output_dir.mkdir()
 
-    dataset = cfg.DATASET.DATASET + '_' + cfg.DATASET.HYBRID_JOINTS_TYPE \
-        if cfg.DATASET.HYBRID_JOINTS_TYPE else cfg.DATASET.DATASET
-    dataset = dataset.replace(':', '_')
-    model = cfg.MODEL.NAME
-    cfg_name = os.path.basename(cfg_name).split('.')[0]
-
-    final_output_dir = root_output_dir / dataset / model / cfg_name
+    final_output_dir = root_output_dir / 'log'
 
     print('=> creating {}'.format(final_output_dir))
     final_output_dir.mkdir(parents=True, exist_ok=True)
 
     time_str = time.strftime('%Y-%m-%d-%H-%M')
-    log_file = '{}_{}_{}.log'.format(cfg_name, time_str, phase)
+    log_file = 'SmartCity_{}.log'.format(time_str)
     final_log_file = final_output_dir / log_file
     head = '%(asctime)-15s %(message)s'
     logging.basicConfig(filename=str(final_log_file),
-                        format=head)
+                        format=head, level=logging.DEBUG)
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    console = logging.StreamHandler()
-    logging.getLogger('').addHandler(console)
 
-    tensorboard_log_dir = Path(cfg.LOG_DIR) / dataset / model / \
-        (cfg_name + '_' + time_str)
+    tensorboard_log_dir = root_output_dir / \
+        'tensorboard' / ('SmartCity_' + time_str)
 
     print('=> creating {}'.format(tensorboard_log_dir))
     tensorboard_log_dir.mkdir(parents=True, exist_ok=True)
 
     return logger, str(final_output_dir), str(tensorboard_log_dir)
 
-
-def get_optimizer(cfg, model):
-    optimizer = None
-    if cfg.TRAIN.OPTIMIZER == 'sgd':
-        optimizer = optim.SGD(
-            model.parameters(),
-            lr=cfg.TRAIN.LR,
-            momentum=cfg.TRAIN.MOMENTUM,
-            weight_decay=cfg.TRAIN.WD,
-            nesterov=cfg.TRAIN.NESTEROV
-        )
-    elif cfg.TRAIN.OPTIMIZER == 'adam':
-        optimizer = optim.Adam(
-            model.parameters(),
-            lr=cfg.TRAIN.LR
-        )
-
-    return optimizer
-
-
-def save_checkpoint(states, is_best, output_dir,
-                    filename='checkpoint.pth'):
-    torch.save(states, os.path.join(output_dir, filename))
-    if is_best and 'state_dict' in states:
-        torch.save(states['best_state_dict'],
-                   os.path.join(output_dir, 'model_best.pth'))
 
 
 def get_model_summary(model, *input_tensors, item_length=26, verbose=False):
@@ -128,7 +96,7 @@ def get_model_summary(model, *input_tensors, item_length=26, verbose=False):
                     torch.prod(
                         torch.LongTensor(list(output.size())[2:]))).item()
             elif isinstance(module, nn.Linear):
-                flops = (torch.prod(torch.LongTensor(list(output.size()))) \
+                flops = (torch.prod(torch.LongTensor(list(output.size())))
                          * input[0].size(1)).item()
 
             if isinstance(input[0], list):
@@ -169,7 +137,7 @@ def get_model_summary(model, *input_tensors, item_length=26, verbose=False):
                 ' ' * (space_len - len("Output Size")),
                 ' ' * (space_len - len("Parameters")),
                 ' ' * (space_len - len("Multiply Adds (Flops)"))) \
-                + os.linesep + '-' * space_len * 5 + os.linesep
+            + os.linesep + '-' * space_len * 5 + os.linesep
 
     params_sum = 0
     flops_sum = 0
