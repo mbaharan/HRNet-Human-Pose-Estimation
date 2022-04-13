@@ -48,7 +48,7 @@ def create_logger(cfg: Client):
     print('=> creating {}'.format(tensorboard_log_dir))
     tensorboard_log_dir.mkdir(parents=True, exist_ok=True)
 
-    return logger, str(final_output_dir), str(tensorboard_log_dir)
+    return logger, str(final_log_file), str(tensorboard_log_dir)
 
 
 
