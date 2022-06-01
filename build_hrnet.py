@@ -13,12 +13,12 @@ import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
 
-from .lib.config import update_config
+#from .lib.config import update_config
 from .lib import models
 
 
 def build_hrnnet(cfg, args, logger):
-    update_config(cfg, args)
+    #update_config(cfg, args)
 
 
     logger.info(pprint.pformat(args))
